@@ -2,7 +2,7 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import Mobile from "discourse/lib/mobile";
 
 export default {
-  name: "my-initializer",
+  name: "pdf-previews",
   initialize() {
     withPluginApi("0.8.41", api => {
       if (Mobile.mobileView) return;
