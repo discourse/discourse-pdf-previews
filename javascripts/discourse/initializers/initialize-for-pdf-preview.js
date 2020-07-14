@@ -7,55 +7,63 @@ export default {
     withPluginApi("0.8.41", api => {
       if (Mobile.mobileView) return;
 
-      const createPreviewElem = () => {
-        const preview = document.createElement("iframe");
-        preview.height = 450;
-        preview.classList.add("pdf-preview");
+      try {
+        const createPreviewElem = () => {
+          const preview = document.createElement("iframe");
+          preview.height = 450;
+          preview.classList.add("pdf-preview");
 
-        return preview;
-      };
+          return preview;
+        };
 
-      api.decorateCookedElement(
-        post => {
-          const attachments = [...post.querySelectorAll(".attachment")];
+        api.decorateCookedElement(
+          post => {
+            const attachments = [...post.querySelectorAll(".attachment")];
 
-          if (!attachments) return;
+            if (!attachments) return;
 
-          const pdfs = attachments.filter(attachment =>
-            attachment.href.match(/\.[pdf]+$/g)
-          );
+            const pdfs = attachments.filter(attachment =>
+              attachment.href.match(/\.[pdf]+$/g)
+            );
 
-          if (!pdfs.length) return;
+            if (!pdfs.length) return;
 
-          pdfs.forEach(pdf => {
-            const preview = createPreviewElem();
-            pdf.append(preview);
+            pdfs.forEach(pdf => {
+              const preview = createPreviewElem();
+              pdf.append(preview);
 
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", pdf.href, true);
-            xhr.responseType = "blob";
+              const httpRequest = new XMLHttpRequest();
 
-            xhr.onload = function() {
-              if (this.status == 200) {
-                const blob = new Blob([this.response], {
-                  type: "application/pdf"
-                });
-                const url = URL.createObjectURL(blob);
+              httpRequest.open("GET", pdf.href);
+              httpRequest.responseType = "blob";
 
-                preview.src = url;
-              }
-            };
+              httpRequest.onreadystatechange = () => {
+                if (httpRequest.readyState !== XMLHttpRequest.DONE) return;
 
-            xhr.send();
-            pdf.classList.add("pdf-attachment");
-            pdf.nextSibling.nodeValue = "";
-          });
-        },
-        {
-          id: "pdf-previews",
-          onlyStream: true
-        }
-      );
+                if (httpRequest.status === 200) {
+                  const blob = new Blob([httpRequest.response], {
+                    type: "application/pdf"
+                  });
+                  const src = URL.createObjectURL(blob);
+
+                  preview.src = src;
+                }
+              };
+              httpRequest.send();
+
+              pdf.classList.add("pdf-attachment");
+              pdf.nextSibling.nodeValue = "";
+            });
+          },
+          {
+            id: "pdf-previews",
+            onlyStream: true
+          }
+        );
+      } catch (error) {
+        console.warn("There's an issue in the pdf previews theme component");
+        console.error(error);
+      }
     });
   }
 };
