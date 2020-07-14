@@ -35,29 +35,28 @@ export default {
               const preview = createPreviewElem();
               pdf.append(preview);
 
-              const httpRequest = new XMLHttpRequest();
-              httpRequest.open("GET", pdf.href);
-              httpRequest.responseType = "blob";
-
-              httpRequest.onreadystatechange = () => {
-                if (httpRequest.readyState !== XMLHttpRequest.DONE) return;
-
-                if (httpRequest.status === 200) {
-                  const blob = new Blob([httpRequest.response], {
-                    type: "application/pdf"
-                  });
-                  const src = URL.createObjectURL(blob);
-
-                  preview.src = src;
-                }
-              };
-
-              scheduleOnce("afterRender", () => {
-                httpRequest.send();
-              });
-
               pdf.classList.add("pdf-attachment");
               pdf.nextSibling.nodeValue = "";
+
+              scheduleOnce("afterRender", () => {
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.open("GET", pdf.href);
+                httpRequest.responseType = "blob";
+
+                httpRequest.onreadystatechange = () => {
+                  if (httpRequest.readyState !== XMLHttpRequest.DONE) return;
+
+                  if (httpRequest.status === 200) {
+                    const blob = new Blob([httpRequest.response], {
+                      type: "application/pdf"
+                    });
+                    const src = URL.createObjectURL(blob);
+
+                    preview.src = src;
+                  }
+                };
+                httpRequest.send();
+              });
             });
           },
           {
