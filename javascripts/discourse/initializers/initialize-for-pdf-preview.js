@@ -22,7 +22,7 @@ export default {
           post => {
             const attachments = [...post.querySelectorAll(".attachment")];
 
-            if (!attachments) return;
+            if (!attachments.length) return;
 
             const pdfs = attachments.filter(attachment =>
               attachment.href.match(/\.[pdf]+$/g)
