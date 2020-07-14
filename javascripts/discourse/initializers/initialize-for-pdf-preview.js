@@ -2,6 +2,8 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { scheduleOnce } from "@ember/runloop";
 import Mobile from "discourse/lib/mobile";
 
+const PREVIEW_HEIGHT = 500;
+
 export default {
   name: "pdf-previews",
   initialize() {
@@ -11,7 +13,7 @@ export default {
       try {
         const createPreviewElem = () => {
           const preview = document.createElement("iframe");
-          preview.height = 450;
+          preview.height = PREVIEW_HEIGHT;
           preview.classList.add("pdf-preview");
 
           return preview;
