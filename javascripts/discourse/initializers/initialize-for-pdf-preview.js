@@ -1,8 +1,15 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
-import { scheduleOnce } from "@ember/runloop";
 import Mobile from "discourse/lib/mobile";
 
 const PREVIEW_HEIGHT = 500;
+
+const createPreviewElem = () => {
+  const preview = document.createElement("iframe");
+  preview.height = PREVIEW_HEIGHT;
+  preview.classList.add("pdf-preview");
+
+  return preview;
+};
 
 export default {
   name: "pdf-previews",
@@ -11,14 +18,6 @@ export default {
       if (Mobile.mobileView) return;
 
       try {
-        const createPreviewElem = () => {
-          const preview = document.createElement("iframe");
-          preview.height = PREVIEW_HEIGHT;
-          preview.classList.add("pdf-preview");
-
-          return preview;
-        };
-
         api.decorateCookedElement(
           post => {
             const attachments = [...post.querySelectorAll(".attachment")];
@@ -38,25 +37,23 @@ export default {
               pdf.classList.add("pdf-attachment");
               pdf.nextSibling.nodeValue = "";
 
-              scheduleOnce("afterRender", () => {
-                const httpRequest = new XMLHttpRequest();
-                httpRequest.open("GET", pdf.href);
-                httpRequest.responseType = "blob";
+              const httpRequest = new XMLHttpRequest();
+              httpRequest.open("GET", pdf.href);
+              httpRequest.responseType = "blob";
 
-                httpRequest.onreadystatechange = () => {
-                  if (httpRequest.readyState !== XMLHttpRequest.DONE) return;
+              httpRequest.onreadystatechange = () => {
+                if (httpRequest.readyState !== XMLHttpRequest.DONE) return;
 
-                  if (httpRequest.status === 200) {
-                    const blob = new Blob([httpRequest.response], {
-                      type: "application/pdf"
-                    });
-                    const src = URL.createObjectURL(blob);
+                if (httpRequest.status === 200) {
+                  const blob = new Blob([httpRequest.response], {
+                    type: "application/pdf"
+                  });
+                  const src = URL.createObjectURL(blob);
 
-                    preview.src = src;
-                  }
-                };
-                httpRequest.send();
-              });
+                  preview.src = src;
+                }
+              };
+              httpRequest.send();
             });
           },
           {
@@ -65,7 +62,7 @@ export default {
           }
         );
       } catch (error) {
-        console.warn("There's an issue in the pdf previews theme component");
+        console.error("There's an issue in the pdf previews theme component");
         console.error(error);
       }
     });
