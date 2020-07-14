@@ -1,4 +1,5 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
+import { scheduleOnce } from "@ember/runloop";
 import Mobile from "discourse/lib/mobile";
 
 export default {
@@ -33,7 +34,6 @@ export default {
               pdf.append(preview);
 
               const httpRequest = new XMLHttpRequest();
-
               httpRequest.open("GET", pdf.href);
               httpRequest.responseType = "blob";
 
@@ -49,7 +49,10 @@ export default {
                   preview.src = src;
                 }
               };
-              httpRequest.send();
+
+              scheduleOnce("actions", () => {
+                httpRequest.send();
+              });
 
               pdf.classList.add("pdf-attachment");
               pdf.nextSibling.nodeValue = "";
