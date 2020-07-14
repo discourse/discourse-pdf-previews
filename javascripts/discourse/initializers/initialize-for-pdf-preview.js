@@ -52,7 +52,7 @@ export default {
                 }
               };
 
-              scheduleOnce("actions", () => {
+              scheduleOnce("afterRender", () => {
                 httpRequest.send();
               });
 
