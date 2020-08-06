@@ -5,7 +5,9 @@ const PREVIEW_HEIGHT = 500;
 
 const createPreviewElem = () => {
   const preview = document.createElement("iframe");
+  preview.src = "";
   preview.height = PREVIEW_HEIGHT;
+  preview.loading = "lazy";
   preview.classList.add("pdf-preview");
 
   return preview;
@@ -25,7 +27,7 @@ export default {
             if (!attachments.length) return;
 
             const pdfs = attachments.filter(attachment =>
-              attachment.href.match(/\.[pdf]+$/g)
+              attachment.href.match(/\.[pdf]+$/)
             );
 
             if (!pdfs.length) return;
