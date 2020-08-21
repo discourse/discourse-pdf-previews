@@ -37,7 +37,10 @@ export default {
               pdf.append(preview);
 
               pdf.classList.add("pdf-attachment");
-              pdf.nextSibling.nodeValue = "";
+              const fileSize = pdf.nextSibling;
+              if (fileSize) {
+                fileSize.nodeValue = "";
+              }
 
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
