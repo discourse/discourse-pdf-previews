@@ -27,7 +27,7 @@ export default {
             if (!attachments.length) return;
 
             const pdfs = attachments.filter(attachment =>
-              attachment.href.match(/\.[pdf]+$/)
+              attachment.href.match(/\.[pdfPDF]+$/)
             );
 
             if (!pdfs.length) return;
