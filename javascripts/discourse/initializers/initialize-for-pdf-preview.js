@@ -22,8 +22,9 @@ export default {
       try {
         api.decorateCookedElement(
           post => {
-            const attachments = $("a[href$='pdf'],a[href$='PDF']");
+            const attachments = $("a[href$='pdf']");
             console.log("post", post);
+            console.log("att", attachments);
 
             if (!attachments.length) return;
 
