@@ -22,7 +22,8 @@ export default {
       try {
         api.decorateCookedElement(
           post => {
-            const attachments = [...post.querySelectorAll(".attachment")];
+            const attachments = $("a[href$='pdf'],a[href$='PDF']");
+            console.log("post", post);
 
             if (!attachments.length) return;
 
