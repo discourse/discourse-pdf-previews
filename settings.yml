@@ -2,7 +2,7 @@ preview_mode:
   type: enum
   default: Inline
   description:
-    en: "<b>Inline:</b> PDF attachments will be rendered inline within posts<br><b>New Tab:</b> PDF attachment links will take the user to a new tab where the PDF will be rendered"
+    en: "<b>Inline:</b> PDF attachments will be rendered inline within posts<br><br><b>New Tab:</b> PDF attachment links will take the user to a new tab where the PDF will be rendered"
   choices:
     - Inline
     - New Tab
