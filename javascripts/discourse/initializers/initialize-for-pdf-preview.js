@@ -42,25 +42,29 @@ export default {
                 return;
               }
 
-              const preview = createPreviewElem();
-              pdf.append(preview);
-
-              pdf.classList.add("pdf-attachment");
-
-              const httpRequest = new XMLHttpRequest();
-              httpRequest.open("GET", pdf.href);
-              httpRequest.responseType = "blob";
-
               httpRequest.onreadystatechange = () => {
                 if (httpRequest.readyState !== XMLHttpRequest.DONE) return;
 
                 if (httpRequest.status === 200) {
+                  let src = null;
                   const blob = new Blob([httpRequest.response], {
                     type: "application/pdf",
                   });
-                  const src = URL.createObjectURL(blob);
 
-                  preview.src = src;
+                  // inline preview
+                  if (previewMode === "Inline") {
+                    pdf.classList.add("pdf-attachment");
+                    const preview = createPreviewElem();
+                    pdf.append(preview);
+
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                      src = event.target.result;
+                      preview.src = src;
+                    };
+                  }
+
+                  reader.readAsDataURL(blob);
                 }
               };
               httpRequest.send();
