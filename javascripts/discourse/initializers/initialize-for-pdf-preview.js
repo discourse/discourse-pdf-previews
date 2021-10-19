@@ -29,14 +29,15 @@ export default {
             );
 
             pdfs.forEach((pdf) => {
-              const preview = createPreviewElem();
-              pdf.append(preview);
-
-              pdf.classList.add("pdf-attachment");
               const fileSize = pdf.nextSibling;
               if (fileSize) {
                 fileSize.nodeValue = "";
               }
+
+              const preview = createPreviewElem();
+              pdf.append(preview);
+
+              pdf.classList.add("pdf-attachment");
 
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
