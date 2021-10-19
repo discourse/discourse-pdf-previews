@@ -16,23 +16,23 @@ const createPreviewElem = () => {
 export default {
   name: "pdf-previews",
   initialize() {
-    withPluginApi("0.8.41", api => {
+    withPluginApi("0.8.41", (api) => {
       if (Mobile.mobileView) return;
 
       try {
         api.decorateCookedElement(
-          post => {
+          (post) => {
             const attachments = [...post.querySelectorAll(".attachment")];
 
             if (!attachments.length) return;
 
-            const pdfs = attachments.filter(attachment =>
+            const pdfs = attachments.filter((attachment) =>
               attachment.href.match(/\.[pdf]+$/)
             );
 
             if (!pdfs.length) return;
 
-            pdfs.forEach(pdf => {
+            pdfs.forEach((pdf) => {
               const preview = createPreviewElem();
               pdf.append(preview);
 
@@ -51,7 +51,7 @@ export default {
 
                 if (httpRequest.status === 200) {
                   const blob = new Blob([httpRequest.response], {
-                    type: "application/pdf"
+                    type: "application/pdf",
                   });
                   const src = URL.createObjectURL(blob);
 
@@ -63,7 +63,7 @@ export default {
           },
           {
             id: "pdf-previews",
-            onlyStream: true
+            onlyStream: true,
           }
         );
       } catch (error) {
@@ -71,5 +71,5 @@ export default {
         console.error(error);
       }
     });
-  }
+  },
 };
