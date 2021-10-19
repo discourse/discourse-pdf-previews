@@ -34,6 +34,14 @@ export default {
                 fileSize.nodeValue = "";
               }
 
+              const startsWithWhitespace = /^\s+/;
+              const fileName = pdf.innerText;
+
+              if (startsWithWhitespace.test(fileName)) {
+                pdf.innerText = pdf.innerText.trim();
+                return;
+              }
+
               const preview = createPreviewElem();
               pdf.append(preview);
 
