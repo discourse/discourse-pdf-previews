@@ -19,6 +19,15 @@ export default {
     withPluginApi("0.8.41", (api) => {
       if (Mobile.mobileView) return;
 
+      const previewMode = settings.preview_mode;
+      const newTabIcon = () => {
+        const template = document.createElement("template");
+        template.innerHTML = iconHTML("external-link-alt", {
+          class: "new-tab-pdf-icon",
+        });
+        return template.content.firstChild;
+      };
+
       try {
         api.decorateCookedElement(
           (post) => {
@@ -50,6 +59,20 @@ export default {
                   const blob = new Blob([httpRequest.response], {
                     type: "application/pdf",
                   });
+
+                  // new tab previews
+                  if (previewMode === "New Tab") {
+                    pdf.classList.add("new-tab-pdf");
+                    pdf.prepend(newTabIcon());
+                    src = URL.createObjectURL(blob);
+
+                    pdf.addEventListener("click", (event) => {
+                      event.preventDefault();
+                      window.open(src);
+                    });
+
+                    return;
+                  }
 
                   // inline preview
                   if (previewMode === "Inline") {
