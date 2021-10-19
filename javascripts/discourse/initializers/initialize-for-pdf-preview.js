@@ -24,13 +24,9 @@ export default {
           (post) => {
             const attachments = [...post.querySelectorAll(".attachment")];
 
-            if (!attachments.length) return;
-
             const pdfs = attachments.filter((attachment) =>
               attachment.href.match(/\.[pdf]+$/)
             );
-
-            if (!pdfs.length) return;
 
             pdfs.forEach((pdf) => {
               const preview = createPreviewElem();
