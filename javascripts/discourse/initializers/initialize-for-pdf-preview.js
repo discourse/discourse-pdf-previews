@@ -1,4 +1,5 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
+import { iconHTML } from "discourse-common/lib/icon-library";
 import Mobile from "discourse/lib/mobile";
 
 const PREVIEW_HEIGHT = 500;
@@ -16,46 +17,80 @@ const createPreviewElem = () => {
 export default {
   name: "pdf-previews",
   initialize() {
-    withPluginApi("0.8.41", api => {
+    withPluginApi("0.8.41", (api) => {
       if (Mobile.mobileView) return;
+
+      const previewMode = settings.preview_mode;
+      const newTabIcon = () => {
+        const template = document.createElement("template");
+        template.innerHTML = iconHTML("external-link-alt", {
+          class: "new-tab-pdf-icon",
+        });
+        return template.content.firstChild;
+      };
 
       try {
         api.decorateCookedElement(
-          post => {
+          (post) => {
             const attachments = [...post.querySelectorAll(".attachment")];
 
-            if (!attachments.length) return;
-
-            const pdfs = attachments.filter(attachment =>
+            const pdfs = attachments.filter((attachment) =>
               attachment.href.match(/\.[pdf]+$/)
             );
 
-            if (!pdfs.length) return;
-
-            pdfs.forEach(pdf => {
-              const preview = createPreviewElem();
-              pdf.append(preview);
-
-              pdf.classList.add("pdf-attachment");
+            pdfs.forEach((pdf) => {
               const fileSize = pdf.nextSibling;
               if (fileSize) {
                 fileSize.nodeValue = "";
               }
 
+              const startsWithWhitespace = /^\s+/;
+              const fileName = pdf.innerText;
+
+              if (startsWithWhitespace.test(fileName)) {
+                pdf.innerText = pdf.innerText.trim();
+                return;
+              }
+
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
-              httpRequest.responseType = "blob";
+              httpRequest.responseType = "arraybuffer";
 
               httpRequest.onreadystatechange = () => {
                 if (httpRequest.readyState !== XMLHttpRequest.DONE) return;
 
                 if (httpRequest.status === 200) {
+                  let src = null;
                   const blob = new Blob([httpRequest.response], {
-                    type: "application/pdf"
+                    type: "application/pdf",
                   });
-                  const src = URL.createObjectURL(blob);
 
-                  preview.src = src;
+                  // new tab previews
+                  if (previewMode === "New Tab") {
+                    pdf.classList.add("new-tab-pdf");
+                    pdf.prepend(newTabIcon());
+                    src = URL.createObjectURL(blob);
+
+                    pdf.addEventListener("click", (event) => {
+                      event.preventDefault();
+                      window.open(src);
+                    });
+
+                    return;
+                  }
+
+                  // inline preview
+                  pdf.classList.add("pdf-attachment");
+                  const preview = createPreviewElem();
+                  pdf.append(preview);
+
+                  const reader = new FileReader();
+                  reader.onload = function (event) {
+                    src = event.target.result;
+                    preview.src = src;
+                  };
+
+                  reader.readAsDataURL(blob);
                 }
               };
               httpRequest.send();
@@ -63,7 +98,7 @@ export default {
           },
           {
             id: "pdf-previews",
-            onlyStream: true
+            onlyStream: true,
           }
         );
       } catch (error) {
@@ -71,5 +106,5 @@ export default {
         console.error(error);
       }
     });
-  }
+  },
 };
