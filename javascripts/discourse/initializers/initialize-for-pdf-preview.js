@@ -31,6 +31,9 @@ export default {
           const iframe = document.createElement("iframe");
           iframe.src = "";
           iframe.type = "application/pdf";
+          iframe.height = PREVIEW_HEIGHT;
+          iframe.loading = "lazy";
+          iframe.classList.add("pdf-preview");
 
           object.append(iframe);
 
