@@ -47,10 +47,6 @@ export default {
           if (previewMode === "New Tab") {
             pdf.classList.add("new-tab-pdf");
             pdf.prepend(newTabIcon());
-            pdf.addEventListener("click", (event) => {
-              event.preventDefault();
-              window.open(src);
-            });
           }
 
           return elements;
@@ -95,11 +91,16 @@ export default {
                 if (httpRequest.status === 200) {
                   const src = URL.createObjectURL(httpRequest.response);
 
-                  // update object/iframe data/src for inline previews based on
-                  // xhr response
                   if (previewMode === "Inline") {
                     elements.object.data = src;
                     elements.iframe.src = src;
+                  }
+
+                  if (previewMode === "New Tab") {
+                    pdf.addEventListener("click", (event) => {
+                      event.preventDefault();
+                      window.open(src);
+                    });
                   }
                 }
               };
