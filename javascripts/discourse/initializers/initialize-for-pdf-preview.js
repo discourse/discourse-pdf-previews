@@ -20,14 +20,7 @@ export default {
           return template.content.firstChild;
         };
 
-        const createElements = () => {
-          const object = document.createElement("object");
-          object.data = "";
-          object.type = "application/pdf";
-          object.height = PREVIEW_HEIGHT;
-          object.loading = "lazy";
-          object.classList.add("pdf-preview");
-
+        const createPreviewElement = () => {
           const iframe = document.createElement("iframe");
           iframe.src = "";
           iframe.type = "application/pdf";
@@ -35,24 +28,22 @@ export default {
           iframe.loading = "lazy";
           iframe.classList.add("pdf-preview");
 
-          object.append(iframe);
-
-          return { object, iframe };
+          return iframe;
         };
 
         const setUpPreviewType = (pdf) => {
-          const elements = createElements();
           if (previewMode === "Inline") {
+            const preview = createPreviewElement();
             pdf.classList.add("pdf-attachment");
-            pdf.append(elements.object);
+            pdf.append(preview);
+
+            return preview;
           }
 
           if (previewMode === "New Tab") {
             pdf.classList.add("new-tab-pdf");
             pdf.prepend(newTabIcon());
           }
-
-          return elements;
         };
 
         api.decorateCookedElement(
@@ -79,7 +70,7 @@ export default {
               }
 
               // handle preview type
-              const elements = setUpPreviewType(pdf);
+              const preview = setUpPreviewType(pdf);
 
               // the pdf is set to Content-Disposition: attachment; filename="filename.jpg"
               // one the server. this means we can't just use the href as the
@@ -95,8 +86,7 @@ export default {
                   const src = URL.createObjectURL(httpRequest.response);
 
                   if (previewMode === "Inline") {
-                    elements.object.data = src;
-                    elements.iframe.src = src;
+                    preview.src = src;
                   }
 
                   if (previewMode === "New Tab") {
