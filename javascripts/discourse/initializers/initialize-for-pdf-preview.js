@@ -35,7 +35,7 @@ export default {
           if (previewMode === "Inline") {
             const preview = createPreviewElement();
             pdf.classList.add("pdf-attachment");
-            pdf.append(preview);
+            pdf.parentNode.append(preview);
 
             return preview;
           }
