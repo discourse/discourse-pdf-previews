@@ -11,7 +11,7 @@ export default {
       if (Mobile.mobileView) return;
 
       try {
-        const previewMode = settings.preview_mode;
+        const previewModeSetting = settings.preview_mode;
         const newTabIcon = () => {
           const template = document.createElement("template");
           template.innerHTML = iconHTML("external-link-alt", {
@@ -31,16 +31,16 @@ export default {
           return iframe;
         };
 
-        const setUpPreviewType = (pdf) => {
-          if (previewMode === "Inline") {
+        const setUpPreviewType = (pdf, renderMode) => {
+          if (renderMode === "Inline") {
             const preview = createPreviewElement();
             pdf.classList.add("pdf-attachment");
-            pdf.append(preview);
+            pdf.after(preview);
 
             return preview;
           }
 
-          if (previewMode === "New Tab") {
+          if (renderMode === "New Tab") {
             pdf.classList.add("new-tab-pdf");
             pdf.prepend(newTabIcon());
           }
@@ -60,21 +60,27 @@ export default {
                 fileSize.nodeValue = "";
               }
 
-              // ignore the pdf if its description starts with white-space
               const startsWithWhitespace = /^\s+/;
               const fileName = pdf.innerText;
 
-              if (startsWithWhitespace.test(fileName)) {
-                pdf.innerText = pdf.innerText.trim();
-                return;
-              }
+              // open the pdf in a new tab if either the global setting is
+              // "New Tab" or if the pdf description starts with a whitespace
+              // otherwise, render the preview in the inline in the post
+              const renderMode =
+                previewModeSetting === "New Tab" ||
+                startsWithWhitespace.test(fileName)
+                  ? "New Tab"
+                  : "Inline";
+
+              // we don't need the space anymore.
+              pdf.innerText = pdf.innerText.trim();
 
               // handle preview type
-              const preview = setUpPreviewType(pdf);
+              const preview = setUpPreviewType(pdf, renderMode);
 
               // the pdf is set to Content-Disposition: attachment; filename="filename.jpg"
-              // one the server. this means we can't just use the href as the
-              // data/src for the pdf preview elements.
+              // on the server. this means we can't just use the href as the
+              // src for the pdf preview elements.
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
               httpRequest.responseType = "blob";
@@ -85,11 +91,11 @@ export default {
                 if (httpRequest.status === 200) {
                   const src = URL.createObjectURL(httpRequest.response);
 
-                  if (previewMode === "Inline") {
+                  if (renderMode === "Inline") {
                     preview.src = src;
                   }
 
-                  if (previewMode === "New Tab") {
+                  if (renderMode === "New Tab") {
                     pdf.addEventListener("click", (event) => {
                       event.preventDefault();
                       window.open(src);
