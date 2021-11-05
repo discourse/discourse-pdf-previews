@@ -63,8 +63,8 @@ export default {
               const startsWithWhitespace = /^\s+/;
               const fileName = pdf.innerText;
 
-              // open the pdf in new tab if either the global setting is
-              // "New Tab" or of the pdf description starts with a whitespace
+              // open the pdf in a new tab if either the global setting is
+              // "New Tab" or if the pdf description starts with a whitespace
               // otherwise, render the preview in the inline in the post
               const renderMode =
                 previewModeSetting === "New Tab" ||
@@ -79,8 +79,8 @@ export default {
               const preview = setUpPreviewType(pdf, renderMode);
 
               // the pdf is set to Content-Disposition: attachment; filename="filename.jpg"
-              // one the server. this means we can't just use the href as the
-              // data/src for the pdf preview elements.
+              // on the server. this means we can't just use the href as the
+              // src for the pdf preview elements.
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
               httpRequest.responseType = "blob";
