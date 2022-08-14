@@ -1,6 +1,6 @@
 .pdf-preview {
   width: 100%;
-  background-color: $primary-high;
+  background-color: var(--primary-high);
   border: 0;
 }
 
@@ -8,6 +8,7 @@
   &:before {
     display: none;
   }
+
   .new-tab-pdf-icon {
     margin-right: 4px;
   }

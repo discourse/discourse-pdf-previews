@@ -8,7 +8,9 @@ export default {
   initialize(container) {
     withPluginApi("0.8.41", (api) => {
       const site = container.lookup("site:service");
-      if (site.mobileView) return;
+      if (site.mobileView) {
+        return;
+      }
 
       try {
         const previewModeSetting = settings.preview_mode;
@@ -86,7 +88,9 @@ export default {
               httpRequest.responseType = "blob";
 
               httpRequest.onreadystatechange = () => {
-                if (httpRequest.readyState !== XMLHttpRequest.DONE) return;
+                if (httpRequest.readyState !== XMLHttpRequest.DONE) {
+                  return;
+                }
 
                 if (httpRequest.status === 200) {
                   const src = URL.createObjectURL(httpRequest.response);
@@ -112,8 +116,11 @@ export default {
           }
         );
       } catch (error) {
-        console.error("There's an issue in the pdf previews theme component");
-        console.error(error);
+        // eslint-disable-next-line no-console
+        console.error(
+          "There's an issue in the pdf previews theme component",
+          error
+        );
       }
     });
   },
