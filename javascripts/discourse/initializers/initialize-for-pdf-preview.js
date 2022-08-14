@@ -7,7 +7,7 @@ export default {
   name: "pdf-previews",
   initialize(container) {
     withPluginApi("0.8.41", (api) => {
-      const site = container.lookup("site:service");
+      const site = container.lookup("service:site");
       if (site.mobileView) {
         return;
       }
