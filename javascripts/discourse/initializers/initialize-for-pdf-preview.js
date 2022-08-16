@@ -53,7 +53,7 @@ export default {
             const attachments = [...post.querySelectorAll(".attachment")];
 
             const pdfs = attachments.filter((attachment) =>
-              attachment.href.match(/\.[pdf]+$/)
+              /\.pdf$/i.test(attachment.href)
             );
 
             pdfs.forEach((pdf) => {
