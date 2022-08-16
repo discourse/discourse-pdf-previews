@@ -52,7 +52,9 @@ export default {
           (post) => {
             const attachments = [...post.querySelectorAll(".attachment")];
 
-            const pdfs = attachments.filter((attachment) => /\.pdf$/i.test(attachment.href));
+            const pdfs = attachments.filter((attachment) => 
+              /\.pdf$/i.test(attachment.href)
+            );
 
             pdfs.forEach((pdf) => {
               const fileSize = pdf.nextSibling;
