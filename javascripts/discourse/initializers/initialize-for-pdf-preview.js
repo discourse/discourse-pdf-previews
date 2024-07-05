@@ -102,6 +102,7 @@ export default {
                   if (renderMode === "New Tab") {
                     pdf.addEventListener("click", (event) => {
                       event.preventDefault();
+                      event.stopPropagation();
                       window.open(src);
                     });
                   }
