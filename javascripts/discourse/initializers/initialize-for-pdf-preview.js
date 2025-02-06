@@ -1,5 +1,5 @@
+import { iconHTML } from "discourse/lib/icon-library";
 import { withPluginApi } from "discourse/lib/plugin-api";
-import { iconHTML } from "discourse-common/lib/icon-library";
 
 const PREVIEW_HEIGHT = 500;
 
