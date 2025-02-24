@@ -12,11 +12,11 @@ export default {
         return;
       }
 
-      try {
+      try { 
         const previewModeSetting = settings.preview_mode;
         const newTabIcon = () => {
           const template = document.createElement("template");
-          template.innerHTML = iconHTML("fa-solid fa-arrow-up-right-from-square", {
+          template.innerHTML = iconHTML("up-right-from-square", {
             class: "new-tab-pdf-icon",
           });
           return template.content.firstChild;
