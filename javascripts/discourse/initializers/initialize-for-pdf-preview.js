@@ -12,7 +12,7 @@ export default {
         return;
       }
 
-      try { 
+      try {
         const previewModeSetting = settings.preview_mode;
         const newTabIcon = () => {
           const template = document.createElement("template");
