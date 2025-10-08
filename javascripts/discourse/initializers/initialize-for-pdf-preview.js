@@ -6,7 +6,7 @@ const PREVIEW_HEIGHT = 500;
 export default {
   name: "pdf-previews",
   initialize(container) {
-    withPluginApi("0.8.41", (api) => {
+    withPluginApi((api) => {
       const site = container.lookup("service:site");
       if (site.mobileView) {
         return;
