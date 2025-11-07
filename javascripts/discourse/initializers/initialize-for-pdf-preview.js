@@ -7,13 +7,7 @@ export default {
   name: "pdf-previews",
   initialize(container) {
     withPluginApi((api) => {
-      const site = container.lookup("service:site");
-      if (site.mobileView) {
-        return;
-      }
-
       try {
-        const previewModeSetting = settings.preview_mode;
         const newTabIcon = () => {
           const template = document.createElement("template");
           template.innerHTML = iconHTML("up-right-from-square", {
@@ -49,7 +43,7 @@ export default {
         };
 
         api.decorateCookedElement(
-          (post) => {
+          (post, helper) => {
             const attachments = [...post.querySelectorAll(".attachment")];
 
             const pdfs = attachments.filter((attachment) =>
@@ -65,14 +59,14 @@ export default {
               const startsWithWhitespace = /^\s+/;
               const fileName = pdf.innerText;
 
-              // open the pdf in a new tab if either the global setting is
-              // "New Tab" or if the pdf description starts with a whitespace
-              // otherwise, render the preview in the inline in the post
-              const renderMode =
-                previewModeSetting === "New Tab" ||
-                startsWithWhitespace.test(fileName)
-                  ? "New Tab"
-                  : "Inline";
+              // Check viewport here instead of during initialization
+              const isMobileView = helper.site.mobileView;
+              const previewModeSetting = settings.preview_mode;
+
+              // Utilize "New Tab" mode for mobile or if the setting dictates/new description pattern
+              const renderMode = isMobileView || previewModeSetting === "New Tab" || startsWithWhitespace.test(fileName)
+                ? "New Tab"
+                : "Inline";
 
               // we don't need the space anymore.
               pdf.innerText = pdf.innerText.trim();
@@ -99,13 +93,12 @@ export default {
                     preview.src = src;
                   }
 
-                  if (renderMode === "New Tab") {
-                    pdf.addEventListener("click", (event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      window.open(src);
-                    });
-                  }
+                  // Add click event that handles opening PDFs (removed _blank since handled by settings)
+                  pdf.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.open(src);
+                  });
                 }
               };
               httpRequest.send();
