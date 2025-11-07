@@ -1,17 +1,16 @@
 import { iconHTML } from "discourse/lib/icon-library";
 import { withPluginApi } from "discourse/lib/plugin-api";
-import { getOwner } from "discourse-common/lib/get-owner";
 
 const PREVIEW_HEIGHT = 500;
 
 export default {
   name: "pdf-previews",
   initialize(container) {
-    withPluginApi("0.8.41", (api) => {
+    withPluginApi("1.0", (api) => {
       try {
-        const siteSettings = container.lookup("service:site-settings");
+        const siteSettings = api.container.lookup("service:site-settings");
+
         const previewModeSetting = siteSettings.preview_mode;
-        
         const newTabIcon = () => {
           const template = document.createElement("template");
           template.innerHTML = iconHTML("up-right-from-square", {
@@ -48,8 +47,8 @@ export default {
 
         api.decorateCookedElement(
           (post) => {
-            // Access site to check for view capabilities here
-            const site = getOwner(container).lookup("service:site");
+            // Use api.container to access the site service
+            const site = api.container.lookup("service:site");
 
             const attachments = [...post.querySelectorAll(".attachment")];
 
@@ -66,20 +65,18 @@ export default {
               const startsWithWhitespace = /^\s+/;
               const fileName = pdf.innerText;
 
-              // Utilize "New Tab" mode for mobile or based on settings/pattern
+              // Set render mode, favoring New Tab for mobile and other conditions
               const renderMode = site.mobileView || previewModeSetting === "New Tab" || startsWithWhitespace.test(fileName)
                 ? "New Tab"
                 : "Inline";
 
-              // No need for the space anymore
+              // Ensure no leading or trailing white spaces
               pdf.innerText = pdf.innerText.trim();
 
-              // handle preview type
+              // Initial preview handling
               const preview = setUpPreviewType(pdf, renderMode);
 
-              // the pdf is set to Content-Disposition: attachment; filename="filename.jpg"
-              // on the server. this means we can't just use the href as the
-              // src for the pdf preview elements.
+              // Setup XML request to fetch PDF for preview or new tab
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
               httpRequest.responseType = "blob";
@@ -96,7 +93,7 @@ export default {
                     preview.src = src;
                   }
 
-                  // Event listeners for PDF link opening
+                  // Add click event for opening PDFs; handles both modes
                   pdf.addEventListener("click", (event) => {
                     event.preventDefault();
                     event.stopPropagation();
