@@ -1,13 +1,17 @@
 import { iconHTML } from "discourse/lib/icon-library";
 import { withPluginApi } from "discourse/lib/plugin-api";
+import { getOwner } from "discourse-common/lib/get-owner";
 
 const PREVIEW_HEIGHT = 500;
 
 export default {
   name: "pdf-previews",
   initialize(container) {
-    withPluginApi((api) => {
+    withPluginApi("0.8.41", (api) => {
       try {
+        const siteSettings = container.lookup("service:site-settings");
+        const previewModeSetting = siteSettings.preview_mode;
+        
         const newTabIcon = () => {
           const template = document.createElement("template");
           template.innerHTML = iconHTML("up-right-from-square", {
@@ -43,7 +47,10 @@ export default {
         };
 
         api.decorateCookedElement(
-          (post, helper) => {
+          (post) => {
+            // Access site to check for view capabilities here
+            const site = getOwner(container).lookup("service:site");
+
             const attachments = [...post.querySelectorAll(".attachment")];
 
             const pdfs = attachments.filter((attachment) =>
@@ -59,16 +66,12 @@ export default {
               const startsWithWhitespace = /^\s+/;
               const fileName = pdf.innerText;
 
-              // Check viewport here instead of during initialization
-              const isMobileView = helper.site.mobileView;
-              const previewModeSetting = settings.preview_mode;
-
-              // Utilize "New Tab" mode for mobile or if the setting dictates/new description pattern
-              const renderMode = isMobileView || previewModeSetting === "New Tab" || startsWithWhitespace.test(fileName)
+              // Utilize "New Tab" mode for mobile or based on settings/pattern
+              const renderMode = site.mobileView || previewModeSetting === "New Tab" || startsWithWhitespace.test(fileName)
                 ? "New Tab"
                 : "Inline";
 
-              // we don't need the space anymore.
+              // No need for the space anymore
               pdf.innerText = pdf.innerText.trim();
 
               // handle preview type
@@ -93,7 +96,7 @@ export default {
                     preview.src = src;
                   }
 
-                  // Add click event that handles opening PDFs (removed _blank since handled by settings)
+                  // Event listeners for PDF link opening
                   pdf.addEventListener("click", (event) => {
                     event.preventDefault();
                     event.stopPropagation();
