@@ -31,23 +31,17 @@ export default {
         };
 
         const setUpPreviewType = (pdf, renderMode) => {
-          if (renderMode === "Inline") {
-            const preview = createPreviewElement();
-            pdf.classList.add("pdf-attachment");
-            pdf.after(preview);
+          const preview = createPreviewElement();
+          pdf.classList.add("pdf-attachment");
+          pdf.after(preview);
 
-            return preview;
-          }
+          pdf.prepend(newTabIcon());
 
-          if (renderMode === "New Tab") {
-            pdf.classList.add("new-tab-pdf");
-            pdf.prepend(newTabIcon());
-          }
+          return preview;
         };
 
         api.decorateCookedElement(
           (post) => {
-            // Use api.container to access the site service
             const site = api.container.lookup("service:site");
 
             const attachments = [...post.querySelectorAll(".attachment")];
@@ -65,18 +59,14 @@ export default {
               const startsWithWhitespace = /^\s+/;
               const fileName = pdf.innerText;
 
-              // Set render mode, favoring New Tab for mobile and other conditions
               const renderMode = site.mobileView || previewModeSetting === "New Tab" || startsWithWhitespace.test(fileName)
                 ? "New Tab"
                 : "Inline";
 
-              // Ensure no leading or trailing white spaces
               pdf.innerText = pdf.innerText.trim();
 
-              // Initial preview handling
               const preview = setUpPreviewType(pdf, renderMode);
 
-              // Setup XML request to fetch PDF for preview or new tab
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
               httpRequest.responseType = "blob";
@@ -93,7 +83,6 @@ export default {
                     preview.src = src;
                   }
 
-                  // Add click event for opening PDFs; handles both modes
                   pdf.addEventListener("click", (event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -110,7 +99,6 @@ export default {
           }
         );
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error(
           "There's an issue in the pdf previews theme component",
           error
