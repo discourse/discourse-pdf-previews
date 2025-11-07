@@ -6,13 +6,11 @@ const PREVIEW_HEIGHT = 500;
 export default {
   name: "pdf-previews",
   initialize(container) {
-    withPluginApi((api) => {
-      const site = api.container.lookup("service:site"); // Updated for mobile detection
-      const isMobile = site.mobileView; // Use isMobile variable for clarity
-
+    withPluginApi("1.0", (api) => {
       try {
-        const previewModeSetting = settings.preview_mode;
-        
+        const siteSettings = api.container.lookup("service:site-settings");
+
+        const previewModeSetting = siteSettings.preview_mode;
         const newTabIcon = () => {
           const template = document.createElement("template");
           template.innerHTML = iconHTML("up-right-from-square", {
@@ -32,25 +30,28 @@ export default {
           return iframe;
         };
 
-        const setUpPreviewType = (pdf, renderMode) => {
-          if (renderMode === "Inline") {
-            const preview = createPreviewElement();
-            pdf.classList.add("pdf-attachment");
-            pdf.after(preview);
-            pdf.classList.add("new-tab-pdf"); // Add link icon and behavior as "New Tab"
-            pdf.prepend(newTabIcon());
-
-            return preview;
+        const setUpIconAndLink = (pdf, src) => {
+          // Remove any existing icons
+          const existingIcon = pdf.querySelector("svg");
+          if (existingIcon) {
+            existingIcon.remove();
           }
 
-          if (renderMode === "New Tab") {
-            pdf.classList.add("new-tab-pdf");
-            pdf.prepend(newTabIcon());
-          }
+          // Prepend the new tab icon
+          pdf.prepend(newTabIcon());
+
+          // Set the click handler
+          pdf.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            window.open(src);
+          });
         };
 
         api.decorateCookedElement(
           (post) => {
+            const site = api.container.lookup("service:site");
+
             const attachments = [...post.querySelectorAll(".attachment")];
 
             const pdfs = attachments.filter((attachment) =>
@@ -64,25 +65,17 @@ export default {
               }
 
               const startsWithWhitespace = /^\s+/;
-              const fileName = pdf.innerText;
+              const fileName = pdf.innerText.trim();
 
-              // Open the PDF in a new tab if global setting is "New Tab",
-              // or pdf description starts with whitespace, or on mobile
-              // Otherwise, render the preview inline in the post
-              const renderMode =
-                previewModeSetting === "New Tab" ||
-                startsWithWhitespace.test(fileName) ||
-                isMobile // Apply "New Tab" mode to mobile
-                  ? "New Tab"
-                  : "Inline";
+              // Determine the render mode
+              const renderMode = site.mobileView || previewModeSetting === "New Tab" || startsWithWhitespace.test(pdf.innerText)
+                ? "New Tab"
+                : "Inline";
 
-              // Remove the leading space from the pdf file name
-              pdf.innerText = pdf.innerText.trim();
+              // Trim text for space
+              pdf.innerText = fileName;
 
-              // Handle preview type
-              const preview = setUpPreviewType(pdf, renderMode);
-
-              // Set up the PDF src and event listener for the link
+              // Setup XML request to fetch blob for the PDF
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
               httpRequest.responseType = "blob";
@@ -95,16 +88,14 @@ export default {
                 if (httpRequest.status === 200) {
                   const src = URL.createObjectURL(httpRequest.response);
 
-                  if (renderMode === "Inline") {
-                    preview.src = src;
-                  }
+                  // Handle Icon and Link setup
+                  setUpIconAndLink(pdf, src);
 
-                  if (renderMode === "New Tab") {
-                    pdf.addEventListener("click", (event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      window.open(src);
-                    });
+                  if (renderMode === "Inline") {
+                    const preview = createPreviewElement();
+                    pdf.classList.add("pdf-attachment");
+                    pdf.after(preview);
+                    preview.src = src;
                   }
                 }
               };
