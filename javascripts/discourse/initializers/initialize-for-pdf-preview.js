@@ -30,12 +30,24 @@ export default {
           return iframe;
         };
 
+        const setUpIcon = (pdf) => {
+          // Remove any existing icons or unwanted elements within the link
+          const existingIcon = pdf.querySelector("svg");
+          if (existingIcon) {
+            existingIcon.remove();
+          }
+
+          // Prepend the new tab icon
+          pdf.prepend(newTabIcon());
+        };
+
         const setUpPreviewType = (pdf, renderMode) => {
           const preview = createPreviewElement();
           pdf.classList.add("pdf-attachment");
           pdf.after(preview);
 
-          pdf.prepend(newTabIcon());
+          // Set up the icon for both modes
+          setUpIcon(pdf);
 
           return preview;
         };
