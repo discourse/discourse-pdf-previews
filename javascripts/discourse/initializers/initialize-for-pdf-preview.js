@@ -5,15 +5,11 @@ const PREVIEW_HEIGHT = 500;
 
 export default {
   name: "pdf-previews",
-  initialize(container) {
+  initialize() {
     withPluginApi((api) => {
-      const site = container.lookup("service:site");
-      if (site.mobileView) {
-        return;
-      }
-
       try {
         const previewModeSetting = settings.preview_mode;
+
         const newTabIcon = () => {
           const template = document.createElement("template");
           template.innerHTML = iconHTML("up-right-from-square", {
@@ -38,6 +34,8 @@ export default {
             const preview = createPreviewElement();
             pdf.classList.add("pdf-attachment");
             pdf.after(preview);
+            pdf.classList.add("new-tab-pdf");
+            pdf.prepend(newTabIcon());
 
             return preview;
           }
@@ -50,6 +48,9 @@ export default {
 
         api.decorateCookedElement(
           (post) => {
+            const site = api.container.lookup("service:site");
+            const isMobile = site.mobileView;
+
             const attachments = [...post.querySelectorAll(".attachment")];
 
             const pdfs = attachments.filter((attachment) =>
@@ -65,24 +66,15 @@ export default {
               const startsWithWhitespace = /^\s+/;
               const fileName = pdf.innerText;
 
-              // open the pdf in a new tab if either the global setting is
-              // "New Tab" or if the pdf description starts with a whitespace
-              // otherwise, render the preview in the inline in the post
               const renderMode =
-                previewModeSetting === "New Tab" ||
-                startsWithWhitespace.test(fileName)
+                isMobile || previewModeSetting === "New Tab" || startsWithWhitespace.test(fileName)
                   ? "New Tab"
                   : "Inline";
 
-              // we don't need the space anymore.
               pdf.innerText = pdf.innerText.trim();
 
-              // handle preview type
               const preview = setUpPreviewType(pdf, renderMode);
 
-              // the pdf is set to Content-Disposition: attachment; filename="filename.jpg"
-              // on the server. this means we can't just use the href as the
-              // src for the pdf preview elements.
               const httpRequest = new XMLHttpRequest();
               httpRequest.open("GET", pdf.href);
               httpRequest.responseType = "blob";
@@ -99,13 +91,11 @@ export default {
                     preview.src = src;
                   }
 
-                  if (renderMode === "New Tab") {
-                    pdf.addEventListener("click", (event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      window.open(src);
-                    });
-                  }
+                  pdf.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.open(src);
+                  });
                 }
               };
               httpRequest.send();
@@ -117,8 +107,7 @@ export default {
           }
         );
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(
+        throw new Error(
           "There's an issue in the pdf previews theme component",
           error
         );
