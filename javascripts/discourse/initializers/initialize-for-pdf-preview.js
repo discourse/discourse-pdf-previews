@@ -6,11 +6,10 @@ const PREVIEW_HEIGHT = 500;
 export default {
   name: "pdf-previews",
   initialize() {
-    withPluginApi("1.0", (api) => {
+    withPluginApi((api) => {
       try {
-        const siteSettings = api.container.lookup("service:site-settings");
+        const previewModeSetting = settings.preview_mode;
 
-        const previewModeSetting = siteSettings.preview_mode;
         const newTabIcon = () => {
           const template = document.createElement("template");
           template.innerHTML = iconHTML("up-right-from-square", {
@@ -35,7 +34,7 @@ export default {
             const preview = createPreviewElement();
             pdf.classList.add("pdf-attachment");
             pdf.after(preview);
-            pdf.classList.add("new-tab-pdf"); // Add link icon and behavior
+            pdf.classList.add("new-tab-pdf");
             pdf.prepend(newTabIcon());
 
             return preview;
@@ -108,7 +107,7 @@ export default {
           }
         );
       } catch (error) {
-        console.error(
+        throw new Error(
           "There's an issue in the pdf previews theme component",
           error
         );
