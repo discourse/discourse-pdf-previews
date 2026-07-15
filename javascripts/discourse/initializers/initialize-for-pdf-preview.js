@@ -7,10 +7,7 @@ export default {
   name: "pdf-previews",
   initialize(container) {
     withPluginApi((api) => {
-      const site = container.lookup("service:site");
-      if (site.mobileView) {
-        return;
-      }
+      const capabilities = container.lookup("service:capabilities");
 
       try {
         const previewModeSetting = settings.preview_mode;
@@ -50,6 +47,10 @@ export default {
 
         api.decorateCookedElement(
           (post) => {
+            if (!capabilities.viewport.sm) {
+              return;
+            }
+
             const attachments = [...post.querySelectorAll(".attachment")];
 
             const pdfs = attachments.filter((attachment) =>
