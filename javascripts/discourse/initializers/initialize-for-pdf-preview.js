@@ -8,7 +8,7 @@ export default {
   initialize(container) {
     withPluginApi((api) => {
       // MOBILE DETECTION REMOVED - works on all devices now
-      
+
       try {
         const previewModeSetting = settings.preview_mode;
         
